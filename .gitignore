@@ -13,9 +13,6 @@ dist
 firebase-debug.log
 *.log
 
-# this project uses bun (bun.lock); ignore the npm lockfile to avoid a competing lock
-package-lock.json
-
 # env / local
 .env
 .env.*
