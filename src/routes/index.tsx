@@ -5,13 +5,13 @@ import sunImg from "@/assets/sun-texture.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aanya — Yoga & Yog Nidra Guide" },
+      { title: "Neha — Yoga & Yog Nidra Guide" },
       {
         name: "description",
         content:
           "1:1 yoga, breathwork and yog nidra sessions for anxiety, sleep and emotional balance. Book a discovery call or breathwork session online.",
       },
-      { property: "og:title", content: "Aanya — Yoga & Yog Nidra Guide" },
+      { property: "og:title", content: "Neha — Yoga & Yog Nidra Guide" },
       {
         property: "og:description",
         content:
@@ -93,7 +93,7 @@ function Nav() {
           <span className="grid h-9 w-9 place-items-center rounded-full bg-sun-gradient text-primary-foreground font-serif text-lg italic">
             a
           </span>
-          <span className="font-serif text-xl tracking-tight">aanya</span>
+          <span className="font-serif text-xl tracking-tight">neha</span>
         </a>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#offerings" className="hover:text-foreground transition-colors">
@@ -134,7 +134,7 @@ function Hero() {
             Return to the <em className="text-amber-deep">stillness</em> beneath the noise.
           </h1>
           <p className="text-balance mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            I'm Aanya — a yoga and yog nidra guide. Together we'll use breath, movement and deep
+            I'm Neha — a yoga and yog nidra guide. Together we'll use breath, movement and deep
             rest to soften anxiety, restore sleep and bring you home to yourself.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -162,7 +162,7 @@ function Hero() {
           <div className="relative mx-auto aspect-[3/4] w-full max-w-md overflow-hidden rounded-[2rem] shadow-[0_30px_80px_-20px_oklch(0.5_0.18_50/0.35)]">
             <img
               src={heroImg}
-              alt="Aanya meditating in lotus pose at sunrise"
+              alt="Neha meditating in lotus pose at sunrise"
               width={1080}
               height={1440}
               className="h-full w-full object-cover"
@@ -258,7 +258,7 @@ function OfferingCard({ offering }: { offering: Offering }) {
       >
         <span className="font-serif text-2xl">{offering.price}</span>
         <a
-          href="mailto:hello@aanya.yoga?subject=Booking%20enquiry"
+          href="mailto:hello@neha.yoga?subject=Booking%20enquiry"
           className={
             "inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-transform group-hover:translate-x-0.5 " +
             (featured
@@ -320,7 +320,7 @@ function Testimonials() {
       a: "Riya M., Bengaluru",
     },
     {
-      q: "Aanya's yog nidra is the most rested 45 minutes of my week. It's medicine.",
+      q: "Neha's yog nidra is the most rested 45 minutes of my week. It's medicine.",
       a: "Dev K., Mumbai",
     },
     {
@@ -371,25 +371,25 @@ function Footer() {
           </h2>
           <div className="mt-10 flex flex-wrap gap-4">
             <a
-              href="mailto:hello@aanya.yoga?subject=Discovery%20call"
+              href="mailto:hello@neha.yoga?subject=Discovery%20call"
               className="rounded-full bg-background px-7 py-3.5 text-sm font-medium text-foreground transition-transform hover:-translate-y-0.5"
             >
               Book a free discovery call
             </a>
             <a
-              href="mailto:hello@aanya.yoga"
+              href="mailto:hello@neha.yoga"
               className="rounded-full border border-background/30 px-7 py-3.5 text-sm font-medium transition-colors hover:bg-background/10"
             >
-              hello@aanya.yoga
+              hello@neha.yoga
             </a>
           </div>
         </div>
         <div className="space-y-3 text-sm text-background/70 md:col-span-5 md:text-right">
-          <p className="font-serif text-2xl italic text-background">aanya</p>
+          <p className="font-serif text-2xl italic text-background">neha</p>
           <p>Online sessions worldwide</p>
           <p>Mon — Sat · 7am to 8pm IST</p>
           <p className="pt-6 text-xs uppercase tracking-[0.2em] text-background/40">
-            © {new Date().getFullYear()} Aanya Yoga
+            © {new Date().getFullYear()} Neha Yoga
           </p>
         </div>
       </div>
