@@ -26,6 +26,10 @@ jobs:
 
       - name: Build static site (prerender -> dist/client)
         run: npm run build
+        env:
+          # Public-by-design Web3Forms key (only sends to the bound inbox). Set this
+          # repo variable under Settings → Secrets and variables → Actions → Variables.
+          VITE_WEB3FORMS_ACCESS_KEY: ${{ vars.VITE_WEB3FORMS_ACCESS_KEY }}
 
       - name: Deploy to Firebase Hosting live channel
         uses: FirebaseExtended/action-hosting-deploy@v0

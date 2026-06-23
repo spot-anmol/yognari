@@ -1,6 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createContext, useContext, useState, type FormEvent } from "react";
+import { toast } from "sonner";
 import heroImg from "@/assets/hero-yoga.jpg";
 import sunImg from "@/assets/sun-texture.jpg";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Toaster } from "@/components/ui/sonner";
+
+// Web3Forms delivers the form to a fixed inbox bound to this access key on their side,
+// so the destination email never appears in the client bundle. Get a key (free) at
+// https://web3forms.com using the destination email. The key is public by design
+// (it only permits sending to the bound inbox), so it's safe to ship in the client —
+// it lives in an env var purely for config hygiene. Set VITE_WEB3FORMS_ACCESS_KEY in
+// .env locally and as a CI variable for the deploy build (see .env.example).
+const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ?? "";
+
+// Lets any CTA across the page open the shared booking modal with a session label.
+const BookingContext = createContext<(session: string) => void>(() => {});
+const useBooking = () => useContext(BookingContext);
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -73,15 +97,122 @@ const offerings: Offering[] = [
 ];
 
 function Index() {
+  // null = closed; otherwise holds the session label for the open modal.
+  const [session, setSession] = useState<string | null>(null);
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Nav />
-      <Hero />
-      <Offerings />
-      <About />
-      <Testimonials />
-      <Footer />
-    </div>
+    <BookingContext.Provider value={setSession}>
+      <div className="min-h-screen bg-background text-foreground">
+        <Nav />
+        <Hero />
+        <Offerings />
+        <About />
+        <Testimonials />
+        <Footer />
+      </div>
+      <BookingModal session={session} onClose={() => setSession(null)} />
+      <Toaster richColors position="top-center" />
+    </BookingContext.Provider>
+  );
+}
+
+function BookingModal({
+  session,
+  onClose,
+}: {
+  session: string | null;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [sending, setSending] = useState(false);
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (sending) return;
+    if (!WEB3FORMS_ACCESS_KEY) {
+      toast.error("Booking isn't configured yet. Please reach out on WhatsApp instead.");
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: `New booking: ${session}`,
+          from_name: "Neha Yoga website",
+          botcheck: "",
+          Session: session,
+          Name: name,
+          Phone: phone,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success !== false) {
+        toast.success("Thanks! Neha will reach out to you shortly.");
+        setName("");
+        setPhone("");
+        onClose();
+      } else {
+        toast.error("Couldn't send your request — please try again in a moment.");
+      }
+    } catch {
+      toast.error("Couldn't send your request — please check your connection and try again.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <Dialog open={session !== null} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="rounded-2xl sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-2xl tracking-tight">
+            Book your session
+          </DialogTitle>
+          <DialogDescription>
+            {session === "General enquiry"
+              ? "Leave your details and Neha will get back to you."
+              : `Leave your details for ${session} and Neha will get back to you to confirm.`}
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="mt-2 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="booking-name">Your name</Label>
+            <Input
+              id="booking-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoComplete="name"
+              placeholder="e.g. Priya Sharma"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="booking-phone">Phone number</Label>
+            <Input
+              id="booking-phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="tel"
+              placeholder="e.g. +91 98765 43210"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={sending}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {sending ? "Sending…" : "Request booking"}
+            {!sending && <span aria-hidden>→</span>}
+          </button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -91,9 +222,9 @@ function Nav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <a href="#" className="flex items-center gap-2">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-sun-gradient text-primary-foreground font-serif text-lg italic">
-            a
+            n
           </span>
-          <span className="font-serif text-xl tracking-tight">neha</span>
+          <span className="font-serif text-xl tracking-tight">Dr Neha</span>
         </a>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#offerings" className="hover:text-foreground transition-colors">
@@ -216,6 +347,7 @@ function Offerings() {
 
 function OfferingCard({ offering }: { offering: Offering }) {
   const featured = offering.featured;
+  const openBooking = useBooking();
   return (
     <article
       className={
@@ -257,8 +389,9 @@ function OfferingCard({ offering }: { offering: Offering }) {
         style={{ borderColor: featured ? "oklch(1 0 0 / 0.25)" : undefined }}
       >
         <span className="font-serif text-2xl">{offering.price}</span>
-        <a
-          href="mailto:hello@neha.yoga?subject=Booking%20enquiry"
+        <button
+          type="button"
+          onClick={() => openBooking(offering.title)}
           className={
             "inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-transform group-hover:translate-x-0.5 " +
             (featured
@@ -268,7 +401,7 @@ function OfferingCard({ offering }: { offering: Offering }) {
         >
           {offering.cta}
           <span aria-hidden>→</span>
-        </a>
+        </button>
       </div>
     </article>
   );
@@ -356,6 +489,7 @@ function Testimonials() {
 }
 
 function Footer() {
+  const openBooking = useBooking();
   return (
     <footer className="relative overflow-hidden bg-foreground px-6 py-20 text-background">
       <div
@@ -370,18 +504,20 @@ function Footer() {
             One breath is enough to start.
           </h2>
           <div className="mt-10 flex flex-wrap gap-4">
-            <a
-              href="mailto:hello@neha.yoga?subject=Discovery%20call"
+            <button
+              type="button"
+              onClick={() => openBooking("Discovery Call")}
               className="rounded-full bg-background px-7 py-3.5 text-sm font-medium text-foreground transition-transform hover:-translate-y-0.5"
             >
               Book a free discovery call
-            </a>
-            <a
-              href="mailto:hello@neha.yoga"
+            </button>
+            <button
+              type="button"
+              onClick={() => openBooking("General enquiry")}
               className="rounded-full border border-background/30 px-7 py-3.5 text-sm font-medium transition-colors hover:bg-background/10"
             >
-              hello@neha.yoga
-            </a>
+              Say hello
+            </button>
           </div>
         </div>
         <div className="space-y-3 text-sm text-background/70 md:col-span-5 md:text-right">
