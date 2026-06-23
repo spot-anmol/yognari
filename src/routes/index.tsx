@@ -16,8 +16,11 @@ import { Toaster } from "@/components/ui/sonner";
 
 // Web3Forms delivers the form to a fixed inbox bound to this access key on their side,
 // so the destination email never appears in the client bundle. Get a key (free) at
-// https://web3forms.com using the destination email, then paste it here.
-const WEB3FORMS_ACCESS_KEY = "YOUR_ACCESS_KEY_HERE";
+// https://web3forms.com using the destination email. The key is public by design
+// (it only permits sending to the bound inbox), so it's safe to ship in the client —
+// it lives in an env var purely for config hygiene. Set VITE_WEB3FORMS_ACCESS_KEY in
+// .env locally and as a CI variable for the deploy build (see .env.example).
+const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ?? "";
 
 // Lets any CTA across the page open the shared booking modal with a session label.
 const BookingContext = createContext<(session: string) => void>(() => {});
@@ -126,6 +129,10 @@ function BookingModal({
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (sending) return;
+    if (!WEB3FORMS_ACCESS_KEY) {
+      toast.error("Booking isn't configured yet. Please reach out on WhatsApp instead.");
+      return;
+    }
     setSending(true);
     try {
       const res = await fetch("https://api.web3forms.com/submit", {
