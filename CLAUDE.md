@@ -27,3 +27,9 @@ Do **not** force `nitro: { preset: "static" }` or `spa` — both break the build
 
 ## Repo
 `github.com/spot-anmol/yognari`, default branch `main`.
+
+## Working conventions (auto mode)
+- **Never commit directly to `main`.** Always create a separate feature branch off `main`.
+- Verify changes locally (`npm run build`, and `npm run dev` where useful) before opening a PR.
+- Once verified, open a PR against `main` (e.g. via `gh pr create`); let the user review/merge.
+- Pushing to `main` auto-deploys to production (see Deploy), so changes land on `main` only through reviewed PRs.
